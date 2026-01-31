@@ -46,7 +46,7 @@ Voit myös asentaa ne manuaalisesti:
 
 #### 4. Asenna Projektin Riippuvuudet
 
-Avaa terminaali VS Codessa (`Ctrl+\`` tai `View > Terminal`) ja suorita:
+Avaa terminaali VS Codessa (`Ctrl+` ` tai `View > Terminal`) ja suorita:
 
 ```bash
 npm install
@@ -155,7 +155,7 @@ You can also install them manually:
 
 #### 4. Install Project Dependencies
 
-Open the integrated terminal in VS Code (`Ctrl+\`` or `View > Terminal`) and run:
+Open the integrated terminal in VS Code (`Ctrl+` ` or `View > Terminal`) and run:
 
 ```bash
 npm install
@@ -281,7 +281,7 @@ tuning-portal-react/
 
 - `Ctrl+P` - Quick file open / Avaa tiedosto nopeasti
 - `Ctrl+Shift+P` - Command palette / Komentopaletti
-- `Ctrl+\`` - Toggle terminal / Näytä/piilota terminaali
+- `Ctrl+` ` - Toggle terminal / Näytä/piilota terminaali
 - `Alt+Shift+F` - Format document / Muotoile dokumentti
 - `F12` - Go to definition / Siirry määritelmään
 - `Ctrl+Space` - Trigger IntelliSense / Aktivoi IntelliSense
