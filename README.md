@@ -31,6 +31,11 @@ A modern web application for ECU tuning file management, built with Next.js and 
 - Node.js 18.x or higher
 - MySQL 8.x
 - npm or yarn
+- Visual Studio Code (recommended)
+
+## 🤝 Contributing
+
+Want to contribute or set up a fork in Visual Studio Code? Check out our [Contributing Guide](CONTRIBUTING.md) for detailed instructions in both Finnish and English.
 
 ## 🛠️ Installation
 
