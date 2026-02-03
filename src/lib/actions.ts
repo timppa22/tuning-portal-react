@@ -8,15 +8,9 @@ import { createBuildAuthHeader } from '@/lib/buildAuth';
  */
 export async function fetchTuningFiles() {
   try {
-    // For runtime, use the appropriate URL
-    let url;
-    
-    if (process.env.NEXT_PUBLIC_API_URL) {
-      url = `${process.env.NEXT_PUBLIC_API_URL}/api/tuning/history`;
-    } else {
-      // Use relative URL for same-origin API calls
-      url = '/api/tuning/history';
-    }
+    // For server components, we need to construct the full URL properly
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const url = `${baseUrl}/api/tuning/history`;
     
     console.log('Fetching tuning files from URL:', url);
     
