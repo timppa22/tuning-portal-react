@@ -9,7 +9,7 @@ export async function sendVerificationEmail(
   const verifyUrl = `https://cartuner.se/auth/verify-email?token=${token}`;
   try {
     await resend.emails.send({
-      from: "noreply@cartuner.se",
+      from: "onboarding@resend.dev", // väliaikainen osoite
       to: email,
       subject: "Verify your email",
       html: `
