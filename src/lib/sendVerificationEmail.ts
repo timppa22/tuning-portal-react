@@ -1,6 +1,14 @@
+
 import { Resend } from "resend";
+import { v4 as uuidv4 } from "uuid";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+export function generateVerificationToken(userId: number): string {
+  // You can customize token generation logic as needed
+  // Here we use uuidv4 for a random token
+  return uuidv4();
+}
 
 export async function sendVerificationEmail(
   email: string,
