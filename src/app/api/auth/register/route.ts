@@ -107,32 +107,36 @@ export async function POST(request: NextRequest) {
 
     // Use transaction to ensure all operations succeed or fail together
     try {
-      // Start transaction for user creation and email verification
-      const result = await executeTransaction<any>(
+      // Insert user first to get the ID
+      await executeQuery(
+        "INSERT INTO users (username, email, password, full_name, email_verified, registration_ip, last_login_ip, registration_date, user_agent) VALUES (?, ?, ?, ?, FALSE, ?, ?, NOW(), ?)",
         [
-          // Insert new user
-          "INSERT INTO users (username, email, password, full_name, email_verified, registration_ip, last_login_ip, registration_date, user_agent) VALUES (?, ?, ?, ?, FALSE, ?, ?, NOW(), ?)",
-          // The second query will be for the verification token, added dynamically below
-        ],
-        [
-          [
-            username,
-            email,
-            hashedPassword,
-            fullName || null,
-            ip,
-            ip,
-            userAgent,
-          ],
-          // Second query params will be added after we get the user ID
+          username,
+          email,
+          hashedPassword,
+          fullName || null,
+          ip,
+          ip,
+          userAgent,
         ]
       );
 
-      // Get the inserted user ID from the first query result
-      userId = result[0].insertId;
+      // Get the inserted user ID using LAST_INSERT_ID()
+      const idResult = await executeQuery<any>("SELECT LAST_INSERT_ID() as id");
+      userId = idResult[0]?.id;
+
+      if (!userId) {
+        throw new Error("Failed to create user");
+      }
 
       // Generate verification token
-      verificationToken = await generateVerificationToken(userId);
+      verificationToken = generateVerificationToken(userId);
+
+      // Insert verification token
+      await executeQuery(
+        "INSERT INTO email_verification_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR))",
+        [userId, verificationToken]
+      );
 
       // Send verification email with retry mechanism
       let retries = 0;
