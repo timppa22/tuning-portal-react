@@ -5,7 +5,18 @@ import {
   verifyEmailToken,
 } from "./sendVerificationEmail";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend: Resend | null = null;
+
+function getResendInstance(): Resend {
+  if (!resend) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      throw new Error("RESEND_API_KEY environment variable is not set");
+    }
+    resend = new Resend(apiKey);
+  }
+  return resend;
+}
 
 export interface SendEmailOptions {
   to: string;
@@ -19,7 +30,8 @@ export async function sendEmail({
   html,
 }: SendEmailOptions): Promise<boolean> {
   try {
-    await resend.emails.send({
+    const resendInstance = getResendInstance();
+    await resendInstance.emails.send({
       from: "onboarding@resend.dev", // temporary address
       to,
       subject,
