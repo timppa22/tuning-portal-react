@@ -129,23 +129,17 @@ export async function updateTuningRequestStatus(requestId: number, status: strin
  */
 export async function fetchAdminDashboardStats() {
   try {
-    // For runtime, use the appropriate URL
-    let url;
-    
-    if (process.env.NEXT_PUBLIC_API_URL) {
-      url = `${process.env.NEXT_PUBLIC_API_URL}/api/admin/stats`;
-    } else {
-      // Use relative URL for same-origin API calls
-      url = '/api/admin/stats';
-    }
-    
+    // For server components, we need to construct the full URL properly
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const url = `${baseUrl}/api/admin/stats`;
+
     console.log('Fetching admin dashboard stats from URL:', url);
-    
+
     // Set a timeout to prevent hanging requests
-    const timeoutPromise = new Promise((_, reject) => 
+    const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Request timeout')), 5000)
     );
-    
+
     // Create fetch request with abort controller
     const controller = new AbortController();
     const fetchPromise = fetch(url, {
@@ -153,7 +147,7 @@ export async function fetchAdminDashboardStats() {
       headers: createBuildAuthHeader(),
       signal: controller.signal
     });
-    
+
     // Race between fetch and timeout
     const response = await Promise.race([fetchPromise, timeoutPromise])
       .catch(error => {
@@ -161,11 +155,11 @@ export async function fetchAdminDashboardStats() {
         console.error(`Fetch error: ${error.message}`);
         return null;
       }) as Response | null;
-    
+
     // Handle failed or invalid responses
     if (!response || !response.ok) {
       console.warn(`API response not ok: ${response?.status || 'Request failed'}`);
-      
+
       // Return mock data during build time
       if (process.env.NODE_ENV === 'production' && process.env.BUILD_AUTH_TOKEN) {
         console.log('🏗️ Build-time: Using mock data for admin stats');
@@ -182,14 +176,14 @@ export async function fetchAdminDashboardStats() {
           recentActivities: []
         };
       }
-      
+
       throw new Error(`Failed to fetch dashboard stats: ${response?.status || 'Request failed'}`);
     }
-    
+
     return response.json();
   } catch (error) {
     console.error('Error fetching admin dashboard stats:', error);
-    
+
     // Fallback data structure in case of errors
     // This prevents undefined component errors
     return {
@@ -199,11 +193,11 @@ export async function fetchAdminDashboardStats() {
       pendingRequestsChange: 0,
       activeUsers: 0,
       activeUsersChange: 0,
-      creditsSold: 0, 
+      creditsSold: 0,
       creditsSoldChange: 0,
       revenue: 0,
       revenueChange: 0,
       recentActivities: []
     };
   }
-} 
+}
