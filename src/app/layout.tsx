@@ -69,11 +69,13 @@ export const metadata: Metadata = {
     creator: "@tuningportal",
     images: ["https://tuning-portal.eu/images/twitter-image.jpg"],
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-  },
+
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
