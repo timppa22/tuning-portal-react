@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyEmailToken } from "@/lib/email";
+import { verifyEmailToken } from "@/lib/sendVerificationEmail";
 import { generateToken, setAuthCookie } from "@/lib/auth";
 import { getRow } from "@/lib/db";
 import {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeQuery, getRow } from "@/lib/db";
-import { generateVerificationToken, sendVerificationEmail } from "@/lib/email";
+import { generateVerificationToken, sendVerificationEmail } from "@/lib/sendVerificationEmail";
 import {
   rateLimitByIpAndIdentifier,
   logRateLimitEvent,
