@@ -38,7 +38,12 @@ interface AuthContextType {
     email: string;
     password: string;
     fullName: string;
-  }) => Promise<boolean>;
+  }) => Promise<{
+    success: boolean;
+    error?: string;
+    emailVerificationSent?: boolean;
+    verificationToken?: string;
+  }>;
   verifyEmail: (code: string) => Promise<boolean>;
   refreshUserData: () => Promise<void>;
 }
@@ -168,13 +173,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const result = await response.json();
       if (!response.ok) {
-        setError(result.error || "Registration failed");
-        return false;
+        const message = result.error || "Registration failed";
+        setError(message);
+        return { success: false, error: message };
       }
-      return true;
+      return {
+        success: true,
+        emailVerificationSent: result.emailVerificationSent,
+        verificationToken: result.verificationToken,
+      };
     } catch (error) {
-      setError("An error occurred during registration");
-      return false;
+      const message = "An error occurred during registration";
+      setError(message);
+      return { success: false, error: message };
     }
   };
 

@@ -159,9 +159,11 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // If email fails after all retries, throw error to trigger transaction rollback
+      // If email fails after all retries, continue but report that email was not sent
       if (!emailSent) {
-        throw new Error(`Failed to send verification email to: ${email}`);
+        console.warn(
+          `Verification email failed after retries for ${email}. Registration will continue.`
+        );
       }
 
       // Create user object for token generation

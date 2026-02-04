@@ -26,7 +26,8 @@ export async function sendVerificationEmail(
   email: string,
   token: string
 ): Promise<boolean> {
-  const verifyUrl = `https://cartuner.se/auth/verify-email?token=${token}`;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const verifyUrl = `${appUrl}/auth/verify?token=${token}`;
   try {
     const resendInstance = getResendInstance();
     await resendInstance.emails.send({
