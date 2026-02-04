@@ -1,0 +1,75 @@
+### Test Registration Endpoint
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "testpassword123",
+  "fullName": "Test User"
+}
+
+### Test with Existing User (should fail)
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "testpassword123"
+}
+
+### Test Missing Required Fields (should fail)
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser2",
+  "email": ""
+}
+
+### Test Rate Limiting (multiple attempts)
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser3",
+  "email": "test3@example.com",
+  "password": "testpassword123"
+}
+
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser4",
+  "email": "test4@example.com",
+  "password": "testpassword123"
+}
+
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser5",
+  "email": "test5@example.com",
+  "password": "testpassword123"
+}
+
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser6",
+  "email": "test6@example.com",
+  "password": "testpassword123"
+}
+
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser7",
+  "email": "test7@example.com",
+  "password": "testpassword123"
+}
