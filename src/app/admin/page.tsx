@@ -1,139 +1,9 @@
+'use client';
+
 import { Suspense } from 'react';
-import { fetchAdminDashboardStats } from '@/lib/admin/actions';
-import { StatCard, RecentActivity, Charts } from './AdminDashboardClient';
+import { StatCard, RecentActivity, Charts, Overview } from './AdminDashboardClient';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { createBuildAuthHeader } from '@/lib/buildAuth';
-
-// Mock data for build time
-const mockDashboardData = {
-  pendingRequests: 0,
-  pendingRequestsChange: 0,
-  activeUsers: 0,
-  activeUsersChange: 0,
-  creditsSold: 0,
-  creditsSoldChange: 0,
-  revenue: 0,
-  revenueChange: 0,
-  recentActivities: []
-};
-
-// Stats widget with robust error handling for static builds
-async function StatsWidget() {
-  try {
-    const stats = await fetchAdminDashboardStats();
-    
-    if (!stats || stats.error) {
-      return (
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-          <h3 className="text-md font-medium text-red-800 dark:text-red-200">Error Loading Data</h3>
-          <p className="text-sm text-red-600 dark:text-red-300 mt-1">Could not load dashboard statistics. Please try again later.</p>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          title="Pending Requests"
-          value={stats.pendingRequests ?? 0}
-          change={stats.pendingRequestsChange ?? 0}
-          icon="file-pending"
-          color="blue"
-        />
-        <StatCard 
-          title="Active Users"
-          value={stats.activeUsers ?? 0}
-          change={stats.activeUsersChange ?? 0}
-          icon="users"
-          color="green"
-        />
-        <StatCard 
-          title="Credits Sold"
-          value={stats.creditsSold ?? 0}
-          change={stats.creditsSoldChange ?? 0}
-          icon="credit"
-          color="purple"
-        />
-        <StatCard 
-          title="Revenue"
-          value={`$${stats.revenue ?? 0}`}
-          change={stats.revenueChange ?? 0}
-          icon="dollars"
-          color="amber"
-        />
-      </div>
-    );
-  } catch (error) {
-    console.error("Error in StatsWidget:", error);
-    return <BackupStatsWidget />;
-  }
-}
-
-// Guaranteed-to-render backup component
-function BackupStatsWidget() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard 
-        title="Pending Requests"
-        value="--"
-        change={0}
-        icon="file-pending"
-        color="blue"
-      />
-      <StatCard 
-        title="Active Users"
-        value="--"
-        change={0}
-        icon="users"
-        color="green"
-      />
-      <StatCard 
-        title="Credits Sold"
-        value="--"
-        change={0}
-        icon="credit"
-        color="purple"
-      />
-      <StatCard 
-        title="Revenue"
-        value="--"
-        change={0}
-        icon="dollars"
-        color="amber"
-      />
-    </div>
-  );
-}
-
-// Recent activity widget with robust error handling
-async function RecentActivityWidget() {
-  try {
-    const stats = await fetchAdminDashboardStats();
-    
-    if (!stats || stats.error) {
-      return (
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-          <h3 className="text-md font-medium text-red-800 dark:text-red-200">Error Loading Data</h3>
-          <p className="text-sm text-red-600 dark:text-red-300 mt-1">Could not load recent activity. Please try again later.</p>
-        </div>
-      );
-    }
-    
-    return (
-      <RecentActivity 
-        activities={stats.recentActivities ?? []} 
-      />
-    );
-  } catch (error) {
-    console.error("Error in RecentActivityWidget:", error);
-    return (
-      <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-        <h3 className="text-md font-medium text-red-800 dark:text-red-200">Error Loading Data</h3>
-        <p className="text-sm text-red-600 dark:text-red-300 mt-1">Could not load recent activity. Please try again later.</p>
-      </div>
-    );
-  }
-}
+import { useState, useEffect } from 'react';
 
 export default function AdminDashboard() {
   return (
@@ -147,13 +17,23 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      {/* Stats section with suspense boundary and error fallback */}
+      {/* Stats section */}
       <section className="mb-8">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
           Overview
         </h2>
-        <Suspense fallback={<BackupStatsWidget />}>
-          <StatsWidget />
+        <Suspense fallback={
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 animate-pulse">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-4"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+              </div>
+            ))}
+          </div>
+        }>
+          <Overview />
         </Suspense>
       </section>
 
@@ -167,13 +47,13 @@ export default function AdminDashboard() {
         </Suspense>
       </section>
 
-      {/* Recent activity section with suspense boundary */}
+      {/* Recent activity section */}
       <section>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
           Recent Activity
         </h2>
         <Suspense fallback={<div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 h-[300px]"><LoadingSpinner /></div>}>
-          <RecentActivityWidget />
+          <RecentActivity />
         </Suspense>
       </section>
     </div>
