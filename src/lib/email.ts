@@ -1,9 +1,4 @@
 import { Resend } from "resend";
-import {
-  sendVerificationEmail,
-  generateVerificationToken,
-  verifyEmailToken,
-} from "./sendVerificationEmail";
 
 let resend: Resend | null = null;
 
@@ -43,10 +38,3 @@ export async function sendEmail({
     return false;
   }
 }
-
-// Re-export auth email helpers
-export {
-  sendVerificationEmail,
-  generateVerificationToken,
-  verifyEmailToken,
-};
