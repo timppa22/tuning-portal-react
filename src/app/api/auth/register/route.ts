@@ -1,29 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { executeQuery, executeTransaction } from "@/lib/db";
-import { hash } from "bcrypt";
-import {
-  generateToken,
-  setAuthCookie,
-} from "@/lib/auth";
-import { generateVerificationToken, sendVerificationEmail } from "@/lib/sendVerificationEmail";
-import {
-  rateLimitByIpAndIdentifier,
-  logRateLimitEvent,
-} from "@/lib/rate-limit";
+import { createClient } from "@supabase/supabase-js";
 
-interface RegisterRequest {
-  username: string;
-  email: string;
-  password: string;
-  fullName?: string;
-}
-
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  role: "user" | "admin";
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function POST(request: NextRequest) {
   try {
