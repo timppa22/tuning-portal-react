@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRow } from "@/lib/db";
-import { compare } from "bcrypt";
+import { supabase } from "@/lib/supabaseClient";
 import {
   generateToken,
   setAuthCookie,
@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
 
     // Find user in database with ban information
     const user = await getRow<User>(
-      `SELECT u.*, u.is_banned, u.ban_reason, u.ban_expires_at 
-       FROM users u 
+      `SELECT u.*, u.is_banned, u.ban_reason, u.ban_expires_at
+       FROM users u
        WHERE u.email = ? OR u.username = ?`,
       [identifier, identifier]
     );
@@ -54,9 +54,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify password
-    const isPasswordValid = await compare(password, user.password);
-    if (!isPasswordValid) {
+    // Authenticate with Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password,
+    });
+
+    if (error || !data.user) {
       // Log failed login attempt due to invalid password
       await logAuthFailure(identifier, request, "Invalid password");
       return NextResponse.json(
@@ -65,8 +69,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if email is verified
-    if (!user.email_verified) {
+    // Check if email is verified in Supabase
+    if (!data.user.email_confirmed_at) {
       return NextResponse.json(
         {
           error: "Please verify your email before logging in",

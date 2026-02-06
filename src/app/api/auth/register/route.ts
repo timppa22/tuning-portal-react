@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { runQuery } from "@/lib/db";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,6 +32,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: error.message },
         { status: 400 }
+      );
+    }
+
+    // Insert into custom DB
+    if (data.user) {
+      const supabaseId = data.user.id;
+      const firstName = fullName.split(" ")[0] || "";
+      const lastName = fullName.split(" ").slice(1).join(" ") || "";
+
+      await executeQuery(
+        `INSERT INTO users (supabase_id, email, username, first_name, last_name, email_verified, role, is_banned)
+         VALUES (?, ?, ?, ?, ?, ?, 'user', false)
+         ON DUPLICATE KEY UPDATE
+         username = VALUES(username), first_name = VALUES(first_name), last_name = VALUES(last_name)`,
+        [supabaseId, email, username, firstName, lastName, false]
       );
     }
 
