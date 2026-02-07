@@ -11,6 +11,13 @@ import {
   logRateLimitEvent,
 } from "@/lib/rate-limit";
 
+// Rate limiting configuration constants
+const MS_PER_MINUTE = 60000;
+const DEV_RATE_LIMIT = 20;
+const DEV_WINDOW_MINUTES = 15;
+const PROD_RATE_LIMIT = 10;
+const PROD_WINDOW_MINUTES = 30;
+
 interface RegisterRequest {
   username: string;
   email: string;
@@ -44,8 +51,8 @@ export async function POST(request: NextRequest) {
     // Production: Still protective but less restrictive than before
     const isDevelopment = process.env.NODE_ENV === 'development';
     const rateLimit = isDevelopment 
-      ? { limit: 20, windowMs: 15 * 60 * 1000 } // Dev: 20 attempts per 15 minutes
-      : { limit: 10, windowMs: 30 * 60 * 1000 }; // Prod: 10 attempts per 30 minutes
+      ? { limit: DEV_RATE_LIMIT, windowMs: DEV_WINDOW_MINUTES * MS_PER_MINUTE }
+      : { limit: PROD_RATE_LIMIT, windowMs: PROD_WINDOW_MINUTES * MS_PER_MINUTE };
     
     // Apply rate limiting to prevent registration abuse
     const rateLimitResult = await rateLimitByIpAndIdentifier(
@@ -69,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     // If rate limit exceeded, return error with helpful timing information
     if (!rateLimitResult.success) {
-      const minutes = Math.ceil(rateLimitResult.msBeforeNext / 60000);
+      const minutes = Math.ceil(rateLimitResult.msBeforeNext / MS_PER_MINUTE);
       console.warn(`Registration rate limit exceeded for IP: ${ip}, reset in ${minutes} minutes`);
       return NextResponse.json(
         { 
