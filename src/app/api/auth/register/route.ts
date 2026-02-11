@@ -5,7 +5,7 @@ import {
   generateToken,
   setAuthCookie,
 } from "@/lib/auth";
-import { generateVerificationToken, sendVerificationEmail } from "@/lib/email";
+import { generateVerificationToken, sendVerificationEmail } from "@/lib/sendVerificationEmail";
 import {
   rateLimitByIpAndIdentifier,
   logRateLimitEvent,
