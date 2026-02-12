@@ -3,24 +3,27 @@ import { executeQuery } from "@/lib/db";
 import Stripe from "stripe";
 
 // Initialize Stripe with the secret key
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error(
-    "Missing required STRIPE_SECRET_KEY environment variable. Please check your environment configuration."
-  );
+let stripe: Stripe | null = null;
+let webhookSecret: string | undefined;
+
+try {
+  if (process.env.STRIPE_SECRET_KEY) {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2025-02-24.acacia",
+    });
+    webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  } else {
+    console.warn("STRIPE_SECRET_KEY not configured - Stripe webhooks will not function");
+  }
+} catch (error) {
+  console.error("Failed to initialize Stripe:", error);
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-02-24.acacia",
-});
-
-// Webhook secret for verifying webhook events
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export async function POST(request: NextRequest) {
   try {
-    if (!webhookSecret) {
+    if (!stripe || !webhookSecret) {
       return NextResponse.json(
-        { error: "Webhook secret is not configured" },
+        { error: "Stripe is not configured" },
         { status: 500 }
       );
     }

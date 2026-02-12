@@ -28,7 +28,7 @@ interface TuningFileDetails {
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{}> }
 ) {
   try {
     // Get file ID from URL

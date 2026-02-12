@@ -1,0 +1,101 @@
+### Test Registration Endpoint
+POST http://localhost:3003/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "testpassword123",
+  "fullName": "Test User"
+}
+
+### Test Login Endpoint
+POST http://localhost:3003/api/auth/login
+Content-Type: application/json
+
+{
+  "identifier": "testuser",
+  "password": "testpassword123"
+}
+
+### Test Login with Email
+POST http://localhost:3003/api/auth/login
+Content-Type: application/json
+
+{
+  "identifier": "test@example.com",
+  "password": "testpassword123"
+}
+
+### Test with Existing User (should fail)
+POST http://localhost:3003/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "testpassword123",
+  "fullName": "Test User"
+}
+
+### Test Missing Required Fields (should fail)
+POST http://localhost:3003/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser2",
+  "email": "",
+  "password": "",
+  "fullName": ""
+}
+
+### Test Rate Limiting (multiple attempts)
+POST http://localhost:3003/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser3",
+  "email": "test3@example.com",
+  "password": "testpassword123",
+  "fullName": "Test User 3"
+}
+
+POST http://localhost:3003/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser4",
+  "email": "test4@example.com",
+  "password": "testpassword123",
+  "fullName": "Test User 4"
+}
+
+POST http://localhost:3003/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser5",
+  "email": "test5@example.com",
+  "password": "testpassword123",
+  "fullName": "Test User 5"
+}
+
+POST http://localhost:3003/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser6",
+  "email": "test6@example.com",
+  "password": "testpassword123",
+  "fullName": "Test User 6"
+}
+
+POST http://localhost:3003/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser7",
+  "email": "test7@example.com",
+  "password": "testpassword123",
+  "fullName": "Test User 7"
+}

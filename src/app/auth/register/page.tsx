@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthProvider";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const { register } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
@@ -14,11 +12,15 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [verificationLink, setVerificationLink] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
+    setVerificationLink(null);
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
@@ -28,16 +30,28 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const success = await register({
+      const result = await register({
         username: formData.username,
         email: formData.email,
         password: formData.password,
         fullName: formData.username // Using username as fullName for now
       });
-      if (success) {
-        router.push("/auth/verify-email");
+      if (result.success) {
+        if (result.emailVerificationSent) {
+          setSuccessMessage(
+            "Registration successful. Please check your email to verify your account."
+          );
+        } else {
+          setSuccessMessage(
+            "Registration successful, but we couldn't send a verification email."
+          );
+        }
+
+        if (result.verificationToken) {
+          setVerificationLink(`/auth/verify?token=${result.verificationToken}`);
+        }
       } else {
-        setError("Registration failed. Please try again.");
+        setError(result.error || "Registration failed. Please try again.");
       }
     } catch (error) {
       setError("An error occurred during registration");
@@ -121,6 +135,20 @@ export default function RegisterPage() {
           {error && (
             <div className="text-red-500 text-sm text-center">
               {error}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="text-green-600 text-sm text-center space-y-2">
+              <p>{successMessage}</p>
+              {verificationLink && (
+                <a
+                  href={verificationLink}
+                  className="text-indigo-600 hover:text-indigo-700 underline"
+                >
+                  Verify your email
+                </a>
+              )}
             </div>
           )}
 
