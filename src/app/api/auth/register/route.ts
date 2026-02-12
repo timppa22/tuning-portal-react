@@ -11,6 +11,13 @@ import {
   logRateLimitEvent,
 } from "@/lib/rate-limit";
 
+// Rate limiting configuration constants
+const MS_PER_MINUTE = 60000;
+const DEV_RATE_LIMIT = 20;
+const DEV_WINDOW_MINUTES = 15;
+const PROD_RATE_LIMIT = 10;
+const PROD_WINDOW_MINUTES = 30;
+
 interface RegisterRequest {
   username: string;
   email: string;
@@ -39,13 +46,21 @@ export async function POST(request: NextRequest) {
   let user: User;
 
   try {
+    // Environment-based rate limiting configuration
+    // Development/local: More permissive for testing
+    // Production: Still protective but less restrictive than before
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const rateLimit = isDevelopment 
+      ? { limit: DEV_RATE_LIMIT, windowMs: DEV_WINDOW_MINUTES * MS_PER_MINUTE }
+      : { limit: PROD_RATE_LIMIT, windowMs: PROD_WINDOW_MINUTES * MS_PER_MINUTE };
+    
     // Apply rate limiting to prevent registration abuse
     const rateLimitResult = await rateLimitByIpAndIdentifier(
       request,
       "registration",
       {
-        limit: 5, // 5 registration attempts
-        windowMs: 60 * 60 * 1000, // per hour
+        limit: rateLimit.limit,
+        windowMs: rateLimit.windowMs,
         identifier: "register",
         useDatabase: true, // More persistent across server restarts
       }
@@ -59,12 +74,21 @@ export async function POST(request: NextRequest) {
       rateLimitResult.remaining
     );
 
-    // If rate limit exceeded, return error
+    // If rate limit exceeded, return error with helpful timing information
     if (!rateLimitResult.success) {
-      console.warn(`Registration rate limit exceeded for IP: ${ip}`);
+      const minutes = Math.ceil(rateLimitResult.msBeforeNext / MS_PER_MINUTE);
+      console.warn(`Registration rate limit exceeded for IP: ${ip}, reset in ${minutes} minutes`);
       return NextResponse.json(
-        { error: "Too many registration attempts. Please try again later." },
-        { status: 429 }
+        { 
+          error: `Too many registration attempts. Please try again in ${minutes} minute${minutes === 1 ? '' : 's'}.`,
+          retryAfter: rateLimitResult.resetTime,
+        },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil(rateLimitResult.msBeforeNext / 1000).toString(),
+          },
+        }
       );
     }
 
